@@ -3,7 +3,8 @@
                  [org.clojure/clojurescript "0.0-2173"]
                  [org.clojure/core.async "0.1.267.0-0d7780-alpha"]
                  [om "0.6.2"]
-                 [sablono "0.2.16"]]
+                 [sablono "0.2.16"]
+                 [cljs-http "0.1.2"]]
   :source-paths ["src"]
   :plugins [[lein-cljsbuild "1.0.2"]]
   :cljsbuild {:builds [{:id "dev"
