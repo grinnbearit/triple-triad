@@ -8,7 +8,7 @@
   :source-paths ["src"]
   :plugins [[lein-cljsbuild "1.0.2"]]
   :cljsbuild {:builds [{:id "dev"
-                        :source-paths ["src"]
+                        :source-paths ["src/client"]
                         :compiler {:output-to "resources/public/js/triple_triad.js"
                                    :output-dir "resources/public/js/out"
                                    :optimizations :none
