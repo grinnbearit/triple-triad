@@ -9,24 +9,25 @@
 (enable-console-print!)
 
 
-(def app-state (atom {:cards []
-                      :filters {:show? false
-                                :name {:images? false
-                                       :pattern nil}
-                                :level {:min 1
-                                        :max 10}
-                                :top {:min 1
-                                      :max 10}
-                                :right {:min 1
-                                        :max 10}
-                                :bottom {:min 1
-                                         :max 10}
-                                :left {:min 1
-                                       :max 10}
-                                :element #{:earth :fire :holy :ice
-                                           :thunder :wind :neutral}}
-                      :sort {:column :name
-                             :ascending? true}}))
+(def app-state
+  (atom {:cards []
+         :filters {:show? false
+                   :name {:images? false
+                          :pattern nil}
+                   :level {:min 1
+                           :max 10}
+                   :top {:min 1
+                         :max 10}
+                   :right {:min 1
+                           :max 10}
+                   :bottom {:min 1
+                            :max 10}
+                   :left {:min 1
+                          :max 10}
+                   :element #{:earth :fire :holy :ice
+                              :thunder :wind :neutral}}
+         :sort {:column :name
+                :ascending? true}}))
 
 
 (defn- format-rank
@@ -113,13 +114,22 @@
        [:select {:value (get-in app [:filters column :min])
                  :on-change #(update-bound! app % column :min)}
         (for [option (range 1 (inc (get-in app [:filters column :max])))]
-          [:option {:value option} (if A? (case option 10 "A" option) option)])]
+          [:option {:value option} (if A? (format-rank option) option)])]
        [:span " - "]
        [:select {:value (get-in app [:filters column :max])
                  :on-change #(update-bound! app % column :max)}
         (for [option (range (get-in app [:filters column :min]) 11)]
-          [:option {:value option} (if A? (case option 10 "A" option) option)])]]
+          [:option {:value option} (if A? (format-rank option) option)])]]
       (om/build header app {:opts {:column column :text text}})))))
+
+
+(defn- update-element!
+  [app elt]
+  (om/transact! app [:filters :element]
+                (fn [elements]
+                  (if (elements elt)
+                    (disj elements elt)
+                    (conj elements elt)))))
 
 
 (defn element-header
@@ -132,8 +142,7 @@
        (for [[elt text] [[:earth "e"] [:fire "f"] [:holy "h"] [:ice "i"]
                          [:thunder "t"] [:wind "w"] [:neutral "n"]]]
          [:input {:type "checkbox" :checked (contains? (get-in app [:filters :element]) elt)
-                  :on-change #(om/transact! app [:filters :element]
-                                            (fn [es] (if (es elt) (disj es elt) (conj es elt))))}
+                  :on-change #(update-element! app elt)}
           text])]
       (om/build header app {:opts {:column :element :text "element"}})))))
 

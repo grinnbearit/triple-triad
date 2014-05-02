@@ -8,6 +8,10 @@ Images and information from http://finalfantasy.wikia.com/wiki/List_of_Triple_Tr
 
 ## Usage
 
+Compile all `cljs` and `scss` files
+
+    lein cljsbuild once && scss --update src/scss:resources/public/css
+
 Run your web server in the `resources/public` directory
 
     python -m SimpleHTTPServer
