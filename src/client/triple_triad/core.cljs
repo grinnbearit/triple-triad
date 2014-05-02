@@ -49,7 +49,7 @@
   [app e]
   (let [v (.. e -target -value)]
     (if (seq v)
-      (om/update! app [:filters :name :pattern] (re-pattern (str "(?i)" v)))
+      (om/update! app [:filters :name :pattern] v)
       (om/update! app [:filters :name :pattern] nil))))
 
 
@@ -60,6 +60,7 @@
     (if (get-in app [:filters :show?])
       [:th
        [:input {:type "text" :placeholder "name"
+                :value (get-in app [:filters :name :pattern])
                 :on-change #(update-pattern! app %)}]
        [:button {:on-click #(om/transact! app [:filters :name :images?] not)}
         (if (get-in app [:filters :name :images?])
@@ -82,7 +83,8 @@
             [:th "left"]
             [:th "element"]
             [:th "location"]]]
-          [:tbody (let [pattern (get-in app [:filters :name :pattern])]
+          [:tbody (let [text (get-in app [:filters :name :pattern])
+                        pattern (and text (re-pattern (str "(?i)" text)))]
                     (for [card (:cards app)
                           :when (or (not pattern) (re-find pattern (:name card)))]
                       (om/build card-view app {:opts {:card card}})))]])))
