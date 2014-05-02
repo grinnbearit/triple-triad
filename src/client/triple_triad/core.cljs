@@ -12,7 +12,8 @@
 (def app-state (atom {:cards []
                       :filters {:show? false
                                 :name {:images? false
-                                       :pattern nil}}}))
+                                       :pattern nil}}
+                      :sort-by :name}))
 
 
 (defn- format-rank
@@ -45,6 +46,15 @@
           [:td (:location card)]])))
 
 
+(defn header
+  [app owner {:keys [sort-by text]}]
+  (om/component
+   (html [:th (if (= sort-by (:sort-by app))
+                [:span.sortBy text]
+                [:span {:on-click #(om/update! app [:sort-by] sort-by)}
+                 text])])))
+
+
 (defn- update-pattern!
   [app e]
   (let [v (.. e -target -value)]
@@ -66,7 +76,7 @@
         (if (get-in app [:filters :name :images?])
           "Hide Images"
           "Show Images")]]
-      [:th "name"]))))
+      (om/build header app {:opts {:sort-by :name :text "name"}})))))
 
 
 (defn card-list
@@ -76,16 +86,16 @@
           [:thead
            [:tr
             (om/build name-header app)
-            [:th "level"]
-            [:th "top"]
-            [:th "right"]
-            [:th "bottom"]
-            [:th "left"]
-            [:th "element"]
-            [:th "location"]]]
+            (om/build header app {:opts {:sort-by :level :text "level"}})
+            (om/build header app {:opts {:sort-by :top :text "top"}})
+            (om/build header app {:opts {:sort-by :right :text "right"}})
+            (om/build header app {:opts {:sort-by :bottom :text "bottom"}})
+            (om/build header app {:opts {:sort-by :left :text "left"}})
+            (om/build header app {:opts {:sort-by :element :text "element"}})
+            (om/build header app {:opts {:sort-by :location :text "location"}})]]
           [:tbody (let [text (get-in app [:filters :name :pattern])
                         pattern (and text (re-pattern (str "(?i)" text)))]
-                    (for [card (:cards app)
+                    (for [card (sort-by (:sort-by app) (:cards app))
                           :when (or (not pattern) (re-find pattern (:name card)))]
                       (om/build card-view app {:opts {:card card}})))]])))
 
