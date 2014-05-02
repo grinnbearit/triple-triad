@@ -13,7 +13,8 @@
                       :filters {:show? false
                                 :name {:images? false
                                        :pattern nil}}
-                      :sort-by :name}))
+                      :sort {:column :name
+                             :ascending? true}}))
 
 
 (defn- format-rank
@@ -47,12 +48,16 @@
 
 
 (defn header
-  [app owner {:keys [sort-by text]}]
+  [app owner {:keys [column text]}]
   (om/component
-   (html [:th (if (= sort-by (:sort-by app))
-                [:span.sortBy text]
-                [:span {:on-click #(om/update! app [:sort-by] sort-by)}
-                 text])])))
+   (html (if (= column (get-in app [:sort :column]))
+           [:th.sortBy
+            {:on-click #(om/transact! app [:sort :ascending?] not)}
+            text]
+           [:th
+            {:on-click #(om/update! app [:sort] {:column column
+                                                 :ascending? true})}
+            text]))))
 
 
 (defn- update-pattern!
@@ -76,7 +81,7 @@
         (if (get-in app [:filters :name :images?])
           "Hide Images"
           "Show Images")]]
-      (om/build header app {:opts {:sort-by :name :text "name"}})))))
+      (om/build header app {:opts {:column :name :text "name"}})))))
 
 
 (defn card-list
@@ -86,16 +91,20 @@
           [:thead
            [:tr
             (om/build name-header app)
-            (om/build header app {:opts {:sort-by :level :text "level"}})
-            (om/build header app {:opts {:sort-by :top :text "top"}})
-            (om/build header app {:opts {:sort-by :right :text "right"}})
-            (om/build header app {:opts {:sort-by :bottom :text "bottom"}})
-            (om/build header app {:opts {:sort-by :left :text "left"}})
-            (om/build header app {:opts {:sort-by :element :text "element"}})
-            (om/build header app {:opts {:sort-by :location :text "location"}})]]
-          [:tbody (let [text (get-in app [:filters :name :pattern])
+            (om/build header app {:opts {:column :level :text "level"}})
+            (om/build header app {:opts {:column :top :text "top"}})
+            (om/build header app {:opts {:column :right :text "right"}})
+            (om/build header app {:opts {:column :bottom :text "bottom"}})
+            (om/build header app {:opts {:column :left :text "left"}})
+            (om/build header app {:opts {:column :element :text "element"}})
+            (om/build header app {:opts {:column :location :text "location"}})]]
+          [:tbody (let [column (get-in app [:sort :column])
+                        ascending? (get-in app [:sort :ascending?])
+                        text (get-in app [:filters :name :pattern])
                         pattern (and text (re-pattern (str "(?i)" text)))]
-                    (for [card (sort-by (:sort-by app) (:cards app))
+                    (for [card (sort-by (if (= :element column) (comp str :element) column)
+                                        (if ascending? < >)
+                                        (:cards app))
                           :when (or (not pattern) (re-find pattern (:name card)))]
                       (om/build card-view app {:opts {:card card}
                                                :react-key (:name card)})))]])))
