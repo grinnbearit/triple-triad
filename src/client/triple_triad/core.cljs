@@ -11,7 +11,8 @@
 
 (def app-state (atom {:cards []
                       :filters {:show? false
-                                :name {:images? false}}}))
+                                :name {:images? false
+                                       :pattern nil}}}))
 
 
 (defn- format-rank
@@ -44,13 +45,22 @@
           [:td (:location card)]])))
 
 
+(defn- update-pattern!
+  [app e]
+  (let [v (.. e -target -value)]
+    (if (seq v)
+      (om/update! app [:filters :name :pattern] (re-pattern (str "(?i)" v)))
+      (om/update! app [:filters :name :pattern] nil))))
+
+
 (defn name-header
   [app]
   (om/component
    (html
     (if (get-in app [:filters :show?])
       [:th
-       [:div "name"]
+       [:input {:type "text" :placeholder "name"
+                :on-change #(update-pattern! app %)}]
        [:button {:on-click #(om/transact! app [:filters :name :images?] not)}
         (if (get-in app [:filters :name :images?])
           "Hide Images"
@@ -72,8 +82,10 @@
             [:th "left"]
             [:th "element"]
             [:th "location"]]]
-          [:tbody (for [card (:cards app)]
-                    (om/build card-view app {:opts {:card card}}))]])))
+          [:tbody (let [pattern (get-in app [:filters :name :pattern])]
+                    (for [card (:cards app)
+                          :when (or (not pattern) (re-find pattern (:name card)))]
+                      (om/build card-view app {:opts {:card card}})))]])))
 
 
 (defn glossary
@@ -90,8 +102,8 @@
              [:h1 "Triple Triad Glossary"]
              [:button {:on-click #(om/transact! app [:filters :show?] not)}
               (if (get-in app [:filters :show?])
-                "Show Filters"
-                "Hide Filters")]
+                "Hide Filters"
+                "Show Filters")]
              (om/build card-list app)]))))
 
 
