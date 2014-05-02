@@ -130,7 +130,7 @@
                         pattern (and text (re-pattern (str "(?i)" text)))
                         level-min (get-in app [:filters :level :min])
                         level-max (get-in app [:filters :level :max])]
-                    (for [card (sort-by (if (= :element column) (comp str :element) column)
+                    (for [card (sort-by (case column :element (comp str :element) column)
                                         (if ascending? < >)
                                         (:cards app))
                           :when (and (or (not pattern) (re-find pattern (:name card)))
