@@ -12,7 +12,9 @@
 (def app-state (atom {:cards []
                       :filters {:show? false
                                 :name {:images? false
-                                       :pattern nil}}
+                                       :pattern nil}
+                                :level {:min 1
+                                        :max 10}}
                       :sort {:column :name
                              :ascending? true}}))
 
@@ -84,6 +86,30 @@
       (om/build header app {:opts {:column :name :text "name"}})))))
 
 
+(defn- update-level!
+  [app e bound]
+  (let [v (js/parseInt (.. e -target -value))]
+    (om/update! app [:filters :level bound] v)))
+
+
+(defn level-header
+  [app]
+  (om/component
+   (html
+    (if (get-in app [:filters :show?])
+      [:th
+       [:select {:value (get-in app [:filters :level :min])
+                 :on-change #(update-level! app % :min)}
+        (for [option (range 1 (inc (get-in app [:filters :level :max])))]
+          [:option {:value option} option])]
+       [:span "<= level <="]
+       [:select {:value (get-in app [:filters :level :max])
+                 :on-change #(update-level! app % :max)}
+        (for [option (range (get-in app [:filters :level :min]) 11)]
+          [:option {:value option} option])]]
+      (om/build header app {:opts {:column :level :text "level"}})))))
+
+
 (defn card-list
   [app]
   (om/component
@@ -91,7 +117,7 @@
           [:thead
            [:tr
             (om/build name-header app)
-            (om/build header app {:opts {:column :level :text "level"}})
+            (om/build level-header app)
             (om/build header app {:opts {:column :top :text "top"}})
             (om/build header app {:opts {:column :right :text "right"}})
             (om/build header app {:opts {:column :bottom :text "bottom"}})
@@ -101,11 +127,14 @@
           [:tbody (let [column (get-in app [:sort :column])
                         ascending? (get-in app [:sort :ascending?])
                         text (get-in app [:filters :name :pattern])
-                        pattern (and text (re-pattern (str "(?i)" text)))]
+                        pattern (and text (re-pattern (str "(?i)" text)))
+                        level-min (get-in app [:filters :level :min])
+                        level-max (get-in app [:filters :level :max])]
                     (for [card (sort-by (if (= :element column) (comp str :element) column)
                                         (if ascending? < >)
                                         (:cards app))
-                          :when (or (not pattern) (re-find pattern (:name card)))]
+                          :when (and (or (not pattern) (re-find pattern (:name card)))
+                                     (<= level-min (:level card) level-max))]
                       (om/build card-view app {:opts {:card card}
                                                :react-key (:name card)})))]])))
 
