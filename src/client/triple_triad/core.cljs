@@ -97,7 +97,8 @@
                         pattern (and text (re-pattern (str "(?i)" text)))]
                     (for [card (sort-by (:sort-by app) (:cards app))
                           :when (or (not pattern) (re-find pattern (:name card)))]
-                      (om/build card-view app {:opts {:card card}})))]])))
+                      (om/build card-view app {:opts {:card card}
+                                               :react-key (:name card)})))]])))
 
 
 (defn glossary
