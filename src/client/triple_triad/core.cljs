@@ -9,7 +9,8 @@
 (enable-console-print!)
 
 
-(def app-state (atom {:cards []}))
+(def app-state (atom {:cards []
+                      :options {:name {:images? false}}}))
 
 
 (defn- format-rank
@@ -27,54 +28,55 @@
 
 (defn card-view
   [app owner {:keys [card]}]
-  (reify
-    om/IRenderState
-    (render-state [_ {:keys [image?]}]
-      (html [:tr {:key (:name card)}
-             [:td
-              [:div (:name card)]
-              (when image?
-                [:img {:src (:file card)}])]
-             [:td (:level card)]
-             [:td (format-rank (:top card))]
-             [:td (format-rank (:right card))]
-             [:td (format-rank (:bottom card))]
-             [:td (format-rank (:left card))]
-             [:td (format-element (:element card))]
-             [:td (:location card)]]))))
+  (om/component
+   (html [:tr {:key (:name card)}
+          [:td
+           [:div (:name card)]
+           (when (get-in app [:options :name :images?])
+             [:img {:src (:file card)}])]
+          [:td (:level card)]
+          [:td (format-rank (:top card))]
+          [:td (format-rank (:right card))]
+          [:td (format-rank (:bottom card))]
+          [:td (format-rank (:left card))]
+          [:td (format-element (:element card))]
+          [:td (:location card)]])))
 
 
 (defn card-list
-  [app owner]
-  (reify
-    om/IInitState
-    (init-state [_]
-      {:images? true})
+  [app]
+  (om/component
+   (html [:table
+          [:thead
+           [:tr
+            [:th
+             [:button {:on-click #(om/transact! app [:options :name :images?] not)}
+              (if (get-in app [:options :name :images?]) "-" "+")]
+             [:span "name"]]
+            [:th "level"]
+            [:th "top"]
+            [:th "right"]
+            [:th "bottom"]
+            [:th "left"]
+            [:th "element"]
+            [:th "location"]]]
+          [:tbody (for [card (:cards app)]
+                    (om/build card-view app {:opts {:card card}}))]])))
 
+
+(defn glossary
+  [app]
+  (reify
     om/IWillMount
     (will-mount [_]
       (go (let [cards (<! (api/fetch-cards))]
             (om/update! app [:cards] cards))))
 
-    om/IRenderState
-    (render-state [_ {:keys [images?]}]
-      (html [:table
-             [:thead
-              [:tr
-               [:th
-                [:button {:on-click #(om/update-state! owner :images? not)}
-                 (if images? "-" "+")]
-                [:span "name"]]
-               [:th "level"]
-               [:th "top"]
-               [:th "right"]
-               [:th "bottom"]
-               [:th "left"]
-               [:th "element"]
-               [:th "location"]]]
-             [:tbody (for [card (:cards app)]
-                       (om/build card-view app {:opts {:card card}
-                                                :state {:image? images?}}))]]))))
+    om/IRender
+    (render [_]
+      (html [:div
+             [:h1 "Triple Triad Glossary"]
+             (om/build card-list app)]))))
 
 
-(om/root card-list app-state {:target (. js/document (getElementById "app"))})
+(om/root glossary app-state {:target (. js/document (getElementById "app"))})
