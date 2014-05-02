@@ -10,7 +10,8 @@
 
 
 (def app-state (atom {:cards []
-                      :options {:name {:images? false}}}))
+                      :filters {:show? false
+                                :name {:images? false}}}))
 
 
 (defn- format-rank
@@ -32,7 +33,7 @@
    (html [:tr {:key (:name card)}
           [:td
            [:div (:name card)]
-           (when (get-in app [:options :name :images?])
+           (when (get-in app [:filters :name :images?])
              [:img {:src (:file card)}])]
           [:td (:level card)]
           [:td (format-rank (:top card))]
@@ -43,16 +44,27 @@
           [:td (:location card)]])))
 
 
+(defn name-header
+  [app]
+  (om/component
+   (html
+    (if (get-in app [:filters :show?])
+      [:th
+       [:div "name"]
+       [:button {:on-click #(om/transact! app [:filters :name :images?] not)}
+        (if (get-in app [:filters :name :images?])
+          "Hide Images"
+          "Show Images")]]
+      [:th "name"]))))
+
+
 (defn card-list
   [app]
   (om/component
    (html [:table
           [:thead
            [:tr
-            [:th
-             [:button {:on-click #(om/transact! app [:options :name :images?] not)}
-              (if (get-in app [:options :name :images?]) "-" "+")]
-             [:span "name"]]
+            (om/build name-header app)
             [:th "level"]
             [:th "top"]
             [:th "right"]
@@ -76,6 +88,10 @@
     (render [_]
       (html [:div
              [:h1 "Triple Triad Glossary"]
+             [:button {:on-click #(om/transact! app [:filters :show?] not)}
+              (if (get-in app [:filters :show?])
+                "Show Filters"
+                "Hide Filters")]
              (om/build card-list app)]))))
 
 
