@@ -22,7 +22,9 @@
                                 :bottom {:min 1
                                          :max 10}
                                 :left {:min 1
-                                       :max 10}}
+                                       :max 10}
+                                :element #{:earth :fire :holy :ice
+                                           :thunder :wind :neutral}}
                       :sort {:column :name
                              :ascending? true}}))
 
@@ -120,6 +122,22 @@
       (om/build header app {:opts {:column column :text text}})))))
 
 
+(defn element-header
+  [app owner]
+  (om/component
+   (html
+    (if (get-in app [:filters :show?])
+      [:th
+       [:div "element"]
+       (for [[elt text] [[:earth "e"] [:fire "f"] [:holy "h"] [:ice "i"]
+                         [:thunder "t"] [:wind "w"] [:neutral "n"]]]
+         [:input {:type "checkbox" :checked (contains? (get-in app [:filters :element]) elt)
+                  :on-change #(om/transact! app [:filters :element]
+                                            (fn [es] (if (es elt) (disj es elt) (conj es elt))))}
+          text])]
+      (om/build header app {:opts {:column :element :text "element"}})))))
+
+
 (defn card-list
   [app]
   (om/component
@@ -132,7 +150,7 @@
             (om/build number-header app {:opts {:column :right  :text "right"}})
             (om/build number-header app {:opts {:column :bottom :text "bottom"}})
             (om/build number-header app {:opts {:column :left   :text "left"}})
-            (om/build header app {:opts {:column :element :text "element"}})
+            (om/build element-header app)
             (om/build header app {:opts {:column :location :text "location"}})]]
           [:tbody (let [column     (get-in app [:sort :column])
                         ascending? (get-in app [:sort :ascending?])
@@ -147,7 +165,8 @@
                         bottom-min (get-in app [:filters :bottom :min])
                         bottom-max (get-in app [:filters :bottom :max])
                         left-min   (get-in app [:filters :left :min])
-                        left-max   (get-in app [:filters :left :max])]
+                        left-max   (get-in app [:filters :left :max])
+                        elements   (get-in app [:filters :element])]
                     (for [card (sort-by (case column :element (comp str :element) column)
                                         (if ascending? < >)
                                         (:cards app))
@@ -156,7 +175,10 @@
                                      (<= top-min    (:top card)   top-max)
                                      (<= right-min  (:right card) right-max)
                                      (<= bottom-min (:level card) bottom-max)
-                                     (<= left-min   (:level card) left-max))]
+                                     (<= left-min   (:level card) left-max)
+                                     (case (:element card)
+                                       nil (elements :neutral)
+                                       (elements (:element card))))]
                       (om/build card-view app {:opts {:card card}
                                                :react-key (:name card)})))]])))
 
