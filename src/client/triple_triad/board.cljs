@@ -18,8 +18,11 @@
 (defn hand
   [app owner {:keys [color]}]
   (om/component
-   (html [:ul (for [card (get-in app [:hands color])]
-                [:li (:name card)])])))
+   (html [:div (for [card (get-in app [:hands color])]
+                 [(case color
+                    :red :div.red
+                    :div.blue)
+                  [:img {:src (:file card)}]])])))
 
 
 (defn grid
