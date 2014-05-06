@@ -11,9 +11,9 @@
 
 (def app-state
   (atom {:cards []
+         :images? false
          :filters {:show? false
-                   :name {:images? false
-                          :pattern nil}
+                   :name {:pattern nil}
                    :level {:min 1
                            :max 10}
                    :top {:min 1
@@ -49,7 +49,7 @@
    (html [:tr {:key (:name card)}
           [:td
            [:div (:name card)]
-           (when (get-in app [:filters :name :images?])
+           (when (:images? app)
              [:img {:src (:file card)}])]
           [:td (:level card)]
           [:td (format-rank (:top card))]
@@ -87,13 +87,10 @@
    (html
     (if (get-in app [:filters :show?])
       [:th
+       [:div "name"]
        [:input {:type "text" :placeholder "name"
                 :value (get-in app [:filters :name :pattern])
-                :on-change #(update-pattern! app %)}]
-       [:button {:on-click #(om/transact! app [:filters :name :images?] not)}
-        (if (get-in app [:filters :name :images?])
-          "Hide Images"
-          "Show Images")]]
+                :on-change #(update-pattern! app %)}]]
       (om/build header app {:opts {:column :name :text "name"}})))))
 
 
@@ -208,6 +205,10 @@
               (if (get-in app [:filters :show?])
                 "Hide Filters"
                 "Show Filters")]
+             [:button {:on-click #(om/transact! app :images? not)}
+              (if (:images? app)
+                "Hide Images"
+                "Show Images")]
              (om/build card-list app)]))))
 
 
