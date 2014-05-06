@@ -87,6 +87,7 @@
    (html
     (if (get-in app [:filters :show?])
       [:th
+       [:div "name"]
        [:input {:type "text" :placeholder "name"
                 :value (get-in app [:filters :name :pattern])
                 :on-change #(update-pattern! app %)}]]
