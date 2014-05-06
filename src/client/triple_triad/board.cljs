@@ -29,9 +29,9 @@
   [app]
   (om/component
    (html [:div
-          [:div [:span] [:span] [:span]]
-          [:div [:span] [:span] [:span]]
-          [:div [:span] [:span] [:span]]])))
+          [:div [:div.neutral][:div.neutral][:div.neutral]]
+          [:div [:div.neutral][:div.neutral][:div.neutral]]
+          [:div [:div.neutral][:div.neutral][:div.neutral]]])))
 
 
 (defn board
