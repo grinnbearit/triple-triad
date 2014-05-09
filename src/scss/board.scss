@@ -16,6 +16,11 @@
     background: blue;
 }
 
+.picked {
+    @extend .card;
+    background: purple;
+}
+
 .neutral {
     @extend .card;
     border: solid;

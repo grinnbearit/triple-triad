@@ -11,6 +11,8 @@
 
 (def app-state
   (atom {:cards []
+         :player :red
+         :picked nil
          :hands {:red []
                  :blue []}}))
 
@@ -21,7 +23,14 @@
    (let [cards (:cards app)
          hand (get-in app [:hands color])]
      (html [:div (for [idx hand]
-                   [:div {:class (name color)}
+                   [:div (cond-> {:class (name color)}
+
+                                 (= color (:player app))
+                                 (assoc :on-click #(om/update! app :picked idx))
+
+                                 (= idx (:picked app))
+                                 (assoc :class "picked"))
+
                     [:img {:src (get-in cards [idx :file])}]])]))))
 
 
