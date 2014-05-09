@@ -14,7 +14,10 @@
          :player (rand-nth [:red :blue])
          :picked nil
          :hand {:red []
-                :blue []}}))
+                :blue []}
+         :grid [[nil nil nil]
+                [nil nil nil]
+                [nil nil nil]]}))
 
 
 (defn card-hand
@@ -34,13 +37,35 @@
                     [:img {:src (get-in cards [idx :file])}]])]))))
 
 
+(defn- update-grid!
+  [app e row col]
+  (let [player (:player @app)
+        picked (:picked @app)]
+    (om/transact! app (fn [a]
+                        (-> (assoc-in a [:grid row col] [player picked])
+                            (assoc :player (case player :red :blue :red))
+                            (assoc :picked nil)
+                            (update-in [:hand player] (partial remove #{picked})))))))
+
+
 (defn card-grid
   [app]
   (om/component
    (html [:div
-          [:div [:div.neutral][:div.neutral][:div.neutral]]
-          [:div [:div.neutral][:div.neutral][:div.neutral]]
-          [:div [:div.neutral][:div.neutral][:div.neutral]]])))
+          (for [row (range 3)]
+            [:div
+             (for [col (range 3)
+                   :let [[color idx :as cell] (get-in (:grid app) [row col])]]
+               (cond  cell
+                      [:div {:class (name color)}
+                       [:img {:src (get-in (:cards app) [idx :file])}]]
+
+                      (:picked app)
+                      [:div.neutral
+                       {:on-click #(update-grid! app % row col)}]
+
+                      :else
+                      [:div.neutral]))])])))
 
 
 (defn board
@@ -58,6 +83,7 @@
     om/IRender
     (render [_]
       (html [:div
+             [:div (pr-str (dissoc @app-state :cards))]
              [:h1 "Triple Triad Board"]
              [:h2 (str (name (:player app)) "'s turn")]
              (om/build card-hand app {:opts {:color :red}})
