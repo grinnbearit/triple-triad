@@ -15,7 +15,7 @@
                  :blue []}}))
 
 
-(defn hand
+(defn card-hand
   [app owner {:keys [color]}]
   (om/component
    (html [:div (for [card (get-in app [:hands color])]
@@ -23,7 +23,7 @@
                   [:img {:src (:file card)}]])])))
 
 
-(defn grid
+(defn card-grid
   [app]
   (om/component
    (html [:div
