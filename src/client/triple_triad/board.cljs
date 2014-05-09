@@ -19,9 +19,7 @@
   [app owner {:keys [color]}]
   (om/component
    (html [:div (for [card (get-in app [:hands color])]
-                 [(case color
-                    :red :div.red
-                    :div.blue)
+                 [:div {:class (name color)}
                   [:img {:src (:file card)}]])])))
 
 
