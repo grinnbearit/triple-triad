@@ -11,7 +11,7 @@
 
 (def app-state
   (atom {:cards []
-         :player :red
+         :player (rand-nth [:red :blue])
          :picked nil
          :hands {:red []
                  :blue []}}))
@@ -59,7 +59,7 @@
     (render [_]
       (html [:div
              [:h1 "Triple Triad Board"]
-             [:div (pr-str (dissoc @app-state :cards))]
+             [:h2 (str (name (:player app)) "'s turn")]
              (om/build card-hand app {:opts {:color :red}})
              (om/build card-grid app)
              (om/build card-hand app {:opts {:color :blue}})]))))
