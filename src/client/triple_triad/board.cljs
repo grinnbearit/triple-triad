@@ -18,9 +18,11 @@
 (defn card-hand
   [app owner {:keys [color]}]
   (om/component
-   (html [:div (for [card (get-in app [:hands color])]
-                 [:div {:class (name color)}
-                  [:img {:src (:file card)}]])])))
+   (let [cards (:cards app)
+         hand (get-in app [:hands color])]
+     (html [:div (for [idx hand]
+                   [:div {:class (name color)}
+                    [:img {:src (get-in cards [idx :file])}]])]))))
 
 
 (defn card-grid
@@ -37,18 +39,21 @@
   (reify
     om/IWillMount
     (will-mount [_]
-      (go (let [cards (<! (api/fetch-cards))]
-            (om/update! app {:cards cards
-                             :hands {:red (take 5 (shuffle cards))
-                                     :blue (take 5 (shuffle cards))}}))))
+      (go (let [cards (<! (api/fetch-cards))
+                idxs (vec (repeatedly 10 (partial rand-int (count cards))))]
+            (om/transact! app (fn [a]
+                                (-> (assoc a :cards cards)
+                                    (assoc-in [:hands :red] (subvec idxs 0 5))
+                                    (assoc-in [:hands :blue] (subvec idxs 5 10))))))))
 
     om/IRender
     (render [_]
       (html [:div
              [:h1 "Triple Triad Board"]
-             (om/build hand app {:opts {:color :red}})
-             (om/build grid app)
-             (om/build hand app {:opts {:color :blue}})]))))
+             [:div (pr-str (dissoc @app-state :cards))]
+             (om/build card-hand app {:opts {:color :red}})
+             (om/build card-grid app)
+             (om/build card-hand app {:opts {:color :blue}})]))))
 
 
 (om/root board app-state {:target (. js/document (getElementById "app"))})
