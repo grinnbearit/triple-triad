@@ -13,15 +13,15 @@
   (atom {:cards []
          :player (rand-nth [:red :blue])
          :picked nil
-         :hands {:red []
-                 :blue []}}))
+         :hand {:red []
+                :blue []}}))
 
 
 (defn card-hand
   [app owner {:keys [color]}]
   (om/component
    (let [cards (:cards app)
-         hand (get-in app [:hands color])]
+         hand (get-in app [:hand color])]
      (html [:div (for [idx hand]
                    [:div (cond-> {:class (name color)}
 
@@ -49,11 +49,11 @@
     om/IWillMount
     (will-mount [_]
       (go (let [cards (<! (api/fetch-cards))
-                idxs (vec (repeatedly 10 (partial rand-int (count cards))))]
+                idxs (repeatedly 10 (partial rand-int (count cards)))]
             (om/transact! app (fn [a]
                                 (-> (assoc a :cards cards)
-                                    (assoc-in [:hands :red] (subvec idxs 0 5))
-                                    (assoc-in [:hands :blue] (subvec idxs 5 10))))))))
+                                    (assoc-in [:hand :red] (take 5 idxs))
+                                    (assoc-in [:hand :blue] (take 5 (drop 5 idxs)))))))))
 
     om/IRender
     (render [_]
