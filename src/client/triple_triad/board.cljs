@@ -74,7 +74,7 @@
     om/IWillMount
     (will-mount [_]
       (go (let [cards (<! (api/fetch-cards))
-                idxs (repeatedly 10 (partial rand-int (count cards)))]
+                idxs (take 10 (shuffle (range (count cards))))]
             (om/transact! app (fn [a]
                                 (-> (assoc a :cards cards)
                                     (assoc-in [:hand :red] (take 5 idxs))
