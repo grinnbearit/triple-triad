@@ -25,16 +25,17 @@
   (om/component
    (let [cards (:cards app)
          hand (get-in app [:hand color])]
-     (html [:div (for [idx hand]
-                   [:div (cond-> {:class (name color)}
+     (html [:div.hand
+            (for [idx hand]
+              [:div (cond-> {:class ["card" (name color)]}
 
-                                 (= color (:player app))
-                                 (assoc :on-click #(om/update! app :picked idx))
+                            (= color (:player app))
+                            (assoc :on-click #(om/update! app :picked idx))
 
-                                 (= idx (:picked app))
-                                 (assoc :class "picked"))
+                            (= idx (:picked app))
+                            (assoc :class ["card" "picked"]))
 
-                    [:img {:src (get-in cards [idx :file])}]])]))))
+               [:img {:src (get-in cards [idx :file])}]])]))))
 
 
 (defn- neighbours
@@ -83,15 +84,15 @@
              (for [col (range 3)
                    :let [[color idx :as cell] (get-in (:grid app) [row col])]]
                (cond  cell
-                      [:div {:class (name color)}
+                      [:div {:class ["card" (name color)]}
                        [:img {:src (get-in (:cards app) [idx :file])}]]
 
                       (:picked app)
-                      [:div.neutral
+                      [:div.card.neutral
                        {:on-click #(update-grid! app % row col)}]
 
                       :else
-                      [:div.neutral]))])])))
+                      [:div.card.neutral]))])])))
 
 
 (defn board

@@ -3,26 +3,27 @@
     width:100px;
     display:table-cell;
     vertical-align:middle;
-    text-align:center
+    text-align:center;
+    border: solid;
+}
+
+.hand {
+    padding: 5px;
+    height:130px;
 }
 
 .red {
-    @extend .card;
     background: red;
 }
 
 .blue {
-    @extend .card;
     background: blue;
 }
 
 .picked {
-    @extend .card;
     background: purple;
 }
 
 .neutral {
-    @extend .card;
-    border: solid;
     background: beige;
 }
