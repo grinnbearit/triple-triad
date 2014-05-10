@@ -62,17 +62,32 @@
             (neighbours row col))))
 
 
+(defn- findout-winner
+  [grid]
+  (let [values (apply concat grid)]
+    (when (not-any? nil? values)
+      (->> values
+           (map first)
+           (frequencies)
+           (sort-by second)
+           (last)
+           (first)))))
+
+
 (defn- update-grid!
   [app e row col]
-  (let [cards (:cards @app)
-        grid (:grid @app)
-        player (:player @app)
-        picked (:picked @app)]
+  (let [player (:player @app)
+        picked (:picked @app)
+        grid (grid-step (:cards @app) (:grid @app) row col [player picked])
+        winner (findout-winner grid)]
     (om/transact! app (fn [a]
-                        (-> (assoc a :grid (grid-step cards grid row col [player picked]))
-                            (assoc :player (case player :red :blue :red))
-                            (assoc :picked nil)
-                            (update-in [:hand player] (partial remove #{picked})))))))
+                        (cond-> (-> (assoc a :grid grid)
+                                    (assoc :player (case player :red :blue :red))
+                                    (assoc :picked nil)
+                                    (update-in [:hand player] (partial remove #{picked})))
+
+                                winner
+                                (assoc :winner winner))))))
 
 
 (defn card-grid
@@ -95,6 +110,19 @@
                       [:div.card.neutral]))])])))
 
 
+(defn- reset-game!
+  [app]
+  (let [cards (:cards @app)
+        idxs (take 10 (shuffle (range (count cards))))]
+    (om/transact! app (fn [a]
+                        (-> (assoc a :winner nil)
+                            (assoc-in [:hand :red] (take 5 idxs))
+                            (assoc-in [:hand :blue] (take 5 (drop 5 idxs)))
+                            (assoc :grid [[nil nil nil]
+                                          [nil nil nil]
+                                          [nil nil nil]]))))))
+
+
 (defn board
   [app]
   (reify
@@ -111,7 +139,13 @@
     (render [_]
       (html [:div
              [:h1 "Triple Triad Board"]
-             [:h2 (str (name (:player app)) "'s turn")]
+             (if-let [winner (:winner app)]
+               [:div
+                [:span {:class (str (name (:winner app)) "-text")}
+                 (str (name (:winner app)) " wins")]
+                [:button {:on-click #(reset-game! app)} "start over"]]
+               [:span {:class (str (name (:player app)) "-text")}
+                (str (name (:player app)) "'s turn")])
              (om/build card-hand app {:opts {:color :red}})
              (om/build card-grid app)
              (om/build card-hand app {:opts {:color :blue}})]))))
