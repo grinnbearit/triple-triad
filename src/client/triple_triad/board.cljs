@@ -37,12 +37,19 @@
                     [:img {:src (get-in cards [idx :file])}]])]))))
 
 
+(defn- grid-step
+  [cards grid row col cell]
+  (assoc-in grid [row col] cell))
+
+
 (defn- update-grid!
   [app e row col]
-  (let [player (:player @app)
+  (let [cards (:cards @app)
+        grid (:grid @app)
+        player (:player @app)
         picked (:picked @app)]
     (om/transact! app (fn [a]
-                        (-> (assoc-in a [:grid row col] [player picked])
+                        (-> (assoc a :grid (grid-step cards grid row col [player picked]))
                             (assoc :player (case player :red :blue :red))
                             (assoc :picked nil)
                             (update-in [:hand player] (partial remove #{picked})))))))
