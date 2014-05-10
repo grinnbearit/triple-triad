@@ -37,9 +37,28 @@
                     [:img {:src (get-in cards [idx :file])}]])]))))
 
 
+(defn- neighbours
+  [row col]
+  (for [[r c :as neighbour] [[(dec row) col :top :bottom]
+                             [(inc row) col :bottom :top]
+                             [row (dec col) :left :right]
+                             [row (inc col) :right :left]]
+        :when (and (<= 0 r 2) (<= 0 c 2))]
+    neighbour))
+
+
 (defn- grid-step
-  [cards grid row col cell]
-  (assoc-in grid [row col] cell))
+  [cards grid row col [player picked]]
+  (let [attacker (cards picked)]
+    (reduce (fn [g [r c atk blk]]
+              (let [[color idx] (get-in grid [r c])
+                    blocker (and idx (cards idx))]
+                (if (and blocker (not= color player)
+                         (< (blocker blk) (attacker atk)))
+                  (assoc-in g [r c] [player idx])
+                  g)))
+            (assoc-in grid [row col] [player picked])
+            (neighbours row col))))
 
 
 (defn- update-grid!
@@ -90,7 +109,6 @@
     om/IRender
     (render [_]
       (html [:div
-             [:div (pr-str (dissoc @app-state :cards))]
              [:h1 "Triple Triad Board"]
              [:h2 (str (name (:player app)) "'s turn")]
              (om/build card-hand app {:opts {:color :red}})
