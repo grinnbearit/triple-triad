@@ -13,6 +13,8 @@
   (atom {:cards []
          :player (rand-nth [:red :blue])
          :picked nil
+         :score {:red 0
+                 :blue 0}
          :hand {:red []
                 :blue []}
          :grid [[nil nil nil]
@@ -87,7 +89,8 @@
                                     (update-in [:hand player] (partial remove #{picked})))
 
                                 winner
-                                (assoc :winner winner))))))
+                                (-> (assoc :winner winner)
+                                    (update-in [:score winner] inc)))))))
 
 
 (defn card-grid
@@ -139,6 +142,9 @@
     (render [_]
       (html [:div
              [:h1 "Triple Triad Board"]
+             [:div
+              [:span.red-text (str "red " (get-in app [:score :red]))]
+              [:span.blue-text (str "blue " (get-in app [:score :blue]))]]
              (if-let [winner (:winner app)]
                [:div
                 [:span {:class (str (name (:winner app)) "-text")}
