@@ -9,18 +9,42 @@
       <table class="table table-hover">
         <thead>
           <tr>
-            <th>name</th>
-            <th>level</th>
-            <th>top</th>
-            <th>right</th>
-            <th>bottom</th>
-            <th>left</th>
-            <th>element</th>
-            <th>location</th>
+            <th ng-click="glossary.select('name')"
+                ng-class="{active:glossary.isSelected('name')}">
+              name
+            </th>
+            <th ng-click="glossary.select('level')"
+                ng-class="{active:glossary.isSelected('level')}">
+              level
+            </th>
+            <th ng-click="glossary.select('top')"
+                ng-class="{active:glossary.isSelected('top')}">
+              top
+            </th>
+            <th ng-click="glossary.select('right')"
+                ng-class="{active:glossary.isSelected('right')}">
+              right
+            </th>
+            <th ng-click="glossary.select('bottom')"
+                ng-class="{active:glossary.isSelected('bottom')}">
+              bottom
+            </th>
+            <th ng-click="glossary.select('left')"
+                ng-class="{active:glossary.isSelected('left')}">
+              left
+            </th>
+            <th ng-click="glossary.select('element')"
+                ng-class="{active:glossary.isSelected('element')}">
+              element
+            </th>
+            <th ng-click="glossary.select('location')"
+                ng-class="{active:glossary.isSelected('location')}">
+              location
+            </th>
           </tr>
         </thead>
         <tbody>
-          <tr ng-repeat="card in glossary.cards">
+          <tr ng-repeat="card in glossary.cards | orderBy : glossary.selected">
             <td>{{card.name}}</td>
             <td>{{card.level}}</td>
             <td>{{card.top}}</td>
