@@ -1,11 +1,40 @@
 <!doctype html>
 <html lang="en" ng-app="tripleTriad">
   <head>
-    <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css">
     <title>Triple Triad</title>
   </head>
   <body>
+    <div ng-controller="CardListController as cardList">
+      <table>
+        <thead>
+          <tr>
+            <td>name</td>
+            <td>level</td>
+            <td>top</td>
+            <td>right</td>
+            <td>bottom</td>
+            <td>left</td>
+            <td>element</td>
+            <td>location</td>
+          </tr>
+        </thead>
+        <tbody>
+          <tr ng-repeat="card in cardList.cards">
+            <td>{{card.name}}</td>
+            <td>{{card.level}}</td>
+            <td>{{card.top}}</td>
+            <td>{{card.right}}</td>
+            <td>{{card.bottom}}</td>
+            <td>{{card.left}}</td>
+            <td>{{card.element}}</td>
+            <td>{{card.location}}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
     <script src="/js/angular.min.js"></script>
     <script src="/js/app.js"></script>
+    <script src="/js/controllers.js"></script>
   </body>
 </html>

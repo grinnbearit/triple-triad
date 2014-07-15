@@ -1,1 +1,1 @@
-module = angular.module("tripleTriad", [])
+app = angular.module "tripleTriad", []
