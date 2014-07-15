@@ -5,7 +5,7 @@
     <title>Triple Triad</title>
   </head>
   <body>
-    <div ng-controller="CardListController as cardList">
+    <div ng-controller="GlossaryController as glossary">
       <table class="table table-hover">
         <thead>
           <tr>
@@ -20,7 +20,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr ng-repeat="card in cardList.cards">
+          <tr ng-repeat="card in glossary.cards">
             <td>{{card.name}}</td>
             <td>{{card.level}}</td>
             <td>{{card.top}}</td>

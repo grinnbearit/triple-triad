@@ -1,6 +1,6 @@
 app = angular.module "tripleTriad"
 
-app.controller "CardListController", (Cards) ->
+app.controller "GlossaryController", (Cards) ->
   scope = this
   scope.cards = []
 
