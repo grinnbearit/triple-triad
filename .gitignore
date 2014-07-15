@@ -1,6 +1,3 @@
-out/
-repl/
-target/
 *.js
 .sass-cache
 *.css
