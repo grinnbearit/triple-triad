@@ -1,22 +1,21 @@
 (ns triple-triad.board
-  (:require-macros [cljs.core.async.macros :refer [go]])
   (:require [om.core :as om :include-macros true]
             [sablono.core :as html :refer-macros [html]]
-            [triple-triad.api :as api])
-  (:use [cljs.core.async :only [<!]]))
+            [triple-triad.api :as api]
+            [triple-triad.cards :refer [cards]]))
 
 
 (enable-console-print!)
 
 
 (def app-state
-  (atom {:cards []
-         :player (rand-nth [:red :blue])
+  (atom {:player (rand-nth [:red :blue])
          :picked nil
          :score {:red 0
                  :blue 0}
-         :hand {:red []
-                :blue []}
+         :hand (let [idxs (take 10 (shuffle (range (count cards))))]
+                 {:red (take 5 idxs)
+                  :blue (take 5 (drop 5 idxs))})
          :grid [[nil nil nil]
                 [nil nil nil]
                 [nil nil nil]]}))
@@ -34,7 +33,7 @@
                   (= idx (:picked app))
                   (assoc :class ["card" "picked"]))
 
-     [:img {:src (get-in (:cards app) [idx :file])}]])))
+     [:img {:src (get-in cards [idx :file])}]])))
 
 
 (defn card-hand
@@ -51,7 +50,7 @@
   [app e row col]
   (let [player (:player @app)
         picked (:picked @app)
-        grid (api/grid-step (:cards @app) (:grid @app) row col [player picked])
+        grid (api/grid-step cards (:grid @app) row col [player picked])
         winner (api/winner grid)]
     (om/transact! app (fn [a]
                         (cond-> (-> (assoc a :grid grid)
@@ -71,7 +70,7 @@
     (let [[color idx :as cell] (get-in (:grid app) [row col])]
       (cond cell
             [:div {:class ["card" (name color)]}
-             [:img {:src (get-in (:cards app) [idx :file])}]]
+             [:img {:src (get-in cards [idx :file])}]]
 
             (:picked app)
             [:div.card.neutral
@@ -108,8 +107,7 @@
 
 (defn- reset-state!
   [app]
-  (let [cards (:cards @app)
-        idxs (take 10 (shuffle (range (count cards))))]
+  (let [idxs (take 10 (shuffle (range (count cards))))]
     (om/transact! app #(-> (assoc % :winner nil)
                            (assoc-in [:hand :red] (take 5 idxs))
                            (assoc-in [:hand :blue] (take 5 (drop 5 idxs)))
@@ -138,27 +136,17 @@
 
 (defn board
   [app]
-  (reify
-    om/IWillMount
-    (will-mount [_]
-      (go (let [cards (<! (api/fetch-cards))]
-            (om/transact! app #(let [idxs (take 10 (shuffle (range (count cards))))]
-                                 (-> (assoc % :cards cards)
-                                     (assoc-in [:hand :red] (take 5 idxs))
-                                     (assoc-in [:hand :blue] (take 5 (drop 5 idxs)))))))))
-
-    om/IRender
-    (render [_]
-      (html
-       [:div
-        [:h1 "Triple Triad Board"]
-        (om/build score-board app)
-        (if (:winner app)
-          (om/build winner-header app)
-          (om/build player-header app))
-        (om/build card-hand app {:opts {:color :red}})
-        (om/build card-grid app)
-        (om/build card-hand app {:opts {:color :blue}})]))))
+  (om/component
+   (html
+    [:div
+     [:h1 "Triple Triad Board"]
+     (om/build score-board app)
+     (if (:winner app)
+       (om/build winner-header app)
+       (om/build player-header app))
+     (om/build card-hand app {:opts {:color :red}})
+     (om/build card-grid app)
+     (om/build card-hand app {:opts {:color :blue}})])))
 
 
 (om/root board app-state {:target (. js/document (getElementById "app"))})

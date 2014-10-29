@@ -1,17 +1,15 @@
 (ns triple-triad.glossary
-  (:require-macros [cljs.core.async.macros :refer [go]])
   (:require [om.core :as om :include-macros true]
             [sablono.core :as html :refer-macros [html]]
-            [triple-triad.api :as api])
-  (:use [cljs.core.async :only [<!]]))
+            [triple-triad.api :as api]
+            [triple-triad.cards :refer [cards]]))
 
 
 (enable-console-print!)
 
 
 (def app-state
-  (atom {:cards []
-         :images? false
+  (atom {:images? false
          :filters {:show? false
                    :name {:pattern nil}
                    :level {:min 1
@@ -175,7 +173,7 @@
                         elements   (get-in app [:filters :element])]
                     (for [card (sort-by (case column :element (comp str :element) column)
                                         (if ascending? < >)
-                                        (:cards app))
+                                        cards)
                           :when (and (or (not pattern) (re-find pattern (:name card)))
                                      (<= level-min  (:level card) level-max)
                                      (<= top-min    (:top card)   top-max)
@@ -191,25 +189,18 @@
 
 (defn glossary
   [app]
-  (reify
-    om/IWillMount
-    (will-mount [_]
-      (go (let [cards (<! (api/fetch-cards))]
-            (om/update! app [:cards] cards))))
-
-    om/IRender
-    (render [_]
-      (html [:div
-             [:h1 "Triple Triad Glossary"]
-             [:button {:on-click #(om/transact! app [:filters :show?] not)}
-              (if (get-in app [:filters :show?])
-                "Hide Filters"
-                "Show Filters")]
-             [:button {:on-click #(om/transact! app :images? not)}
-              (if (:images? app)
-                "Hide Images"
-                "Show Images")]
-             (om/build card-list app)]))))
+  (om/component
+   (html [:div
+          [:h1 "Triple Triad Glossary"]
+          [:button {:on-click #(om/transact! app [:filters :show?] not)}
+           (if (get-in app [:filters :show?])
+             "Hide Filters"
+             "Show Filters")]
+          [:button {:on-click #(om/transact! app :images? not)}
+           (if (:images? app)
+             "Hide Images"
+             "Show Images")]
+          (om/build card-list app)])))
 
 
 (om/root glossary app-state {:target (. js/document (getElementById "app"))})
