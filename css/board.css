@@ -1,0 +1,32 @@
+.card {
+  height: 130px;
+  width: 100px;
+  display: table-cell;
+  vertical-align: middle;
+  text-align: center;
+  border: solid; }
+
+.hand {
+  padding: 5px;
+  height: 130px; }
+
+.red {
+  background: red; }
+
+.blue {
+  background: blue; }
+
+.picked {
+  background: purple; }
+
+.neutral {
+  background: beige; }
+
+.red-text {
+  color: red;
+  font-weight: bold; }
+
+.blue-text {
+  color: blue;
+  font-weight: bold;
+  padding: 5px; }

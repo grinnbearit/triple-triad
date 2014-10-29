@@ -1,7 +1,0 @@
-out/
-repl/
-target/
-*.js
-.sass-cache
-*.css
-.DS_Store

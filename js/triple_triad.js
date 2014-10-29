@@ -1,0 +1,15 @@
+goog.addDependency("base.js", ['goog'], []);
+goog.addDependency("../cljs/core.js", ['cljs.core'], ['goog.string', 'goog.array', 'goog.object', 'goog.string.StringBuffer']);
+goog.addDependency("../clojure/walk.js", ['clojure.walk'], ['cljs.core']);
+goog.addDependency("../clojure/string.js", ['clojure.string'], ['cljs.core', 'goog.string', 'goog.string.StringBuffer']);
+goog.addDependency("../clojure/set.js", ['clojure.set'], ['cljs.core']);
+goog.addDependency("../sablono/util.js", ['sablono.util'], ['cljs.core', 'clojure.string', 'clojure.set', 'goog.Uri']);
+goog.addDependency("../sablono/interpreter.js", ['sablono.interpreter'], ['cljs.core', 'clojure.string', 'sablono.util']);
+goog.addDependency("../sablono/core.js", ['sablono.core'], ['cljs.core', 'goog.dom', 'clojure.walk', 'clojure.string', 'sablono.interpreter', 'sablono.util']);
+goog.addDependency("../triple_triad/cards.js", ['triple_triad.cards'], ['cljs.core']);
+goog.addDependency("../om/dom.js", ['om.dom'], ['cljs.core']);
+goog.addDependency("../om/core.js", ['om.core'], ['cljs.core', 'om.dom', 'goog.ui.IdGenerator']);
+goog.addDependency("../triple_triad/api.js", ['triple_triad.api'], ['cljs.core']);
+goog.addDependency("../triple_triad/glossary.js", ['triple_triad.glossary'], ['sablono.core', 'cljs.core', 'triple_triad.cards', 'om.core', 'triple_triad.api']);
+goog.addDependency("../triple_triad/core.js", ['triple_triad.core'], ['sablono.core', 'cljs.core', 'om.core']);
+goog.addDependency("../triple_triad/board.js", ['triple_triad.board'], ['sablono.core', 'cljs.core', 'triple_triad.cards', 'om.core', 'triple_triad.api']);
